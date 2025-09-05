@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Alexa Game Test</title>
+</head>
+<body>
+<canvas id="gameCanvas" width="400" height="400"></canvas>
+<script>
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+let x = 200, y = 200; // キャラクター初期位置
+let frames = [];
+let currentFrame = 0;
+let animInterval = null;
+
+// 連番PNGの読み込み（GitHub Pagesに置く想定）
+for (let i = 1; i <= 30; i++) {
+    const img = new Image();
+    const num = String(i).padStart(2, '0');
+    img.src = `https://username.github.io/your-repo/images/frame_${num}.png`;
+    frames.push(img);
+}
+
+// アニメーション再生
+function playAnimation() {
+    if (animInterval) clearInterval(animInterval);
+    animInterval = setInterval(() => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(frames[currentFrame], x, y);
+        currentFrame = (currentFrame + 1) % frames.length;
+    }, 100); // 100ms/フレーム
+}
+
+// キャラクター移動
+function move(dir) {
+    const step = 10;
+    if (dir === 'up') y -= step;
+    if (dir === 'down') y += step;
+    if (dir === 'left') x -= step;
+    if (dir === 'right') x += step;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(frames[currentFrame], x, y);
+}
+
+// Alexaスキルからのメッセージ受信
+window.addEventListener('message', (event) => {
+    const data = event.data;
+    if (data.action === 'play') playAnimation();
+    if (['up', 'down', 'left', 'right'].includes(data.action)) move(data.action);
+});
+</script>
+</body>
+</html>
